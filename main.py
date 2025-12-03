@@ -1,3 +1,4 @@
+from constants.py import SCREEN_WIDTH, SCREEN_HEIGHT
 import pygame
 
 def main():
