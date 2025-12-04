@@ -24,5 +24,10 @@ def main():
         pygame.display.flip()
         dt = clock.tick(60) / 1000
 
+
+    x = SCREEN_WIDTH / 2
+    y = SRCREEN_HEIGHT / 2
+    player_object = Player(x, y)
+
 if __name__ == "__main__":
     main()
