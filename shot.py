@@ -3,6 +3,8 @@ from circleshape import CircleShape
 from constants import LINE_WIDTH, WHITE, SHOT_RADIUS
 
 class Shot(CircleShape):
+    containers = ()
+
     def __init__(self, x, y):
         super().__init__(x, y, SHOT_RADIUS)
 
