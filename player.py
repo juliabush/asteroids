@@ -32,3 +32,4 @@ class Player(CircleShape):
         
     def move(self, dt):
         unit_vector = pygame.Vector2(0,1)
+        rotated_vector = unit_vector.rotate(self.rotation)
