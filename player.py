@@ -29,4 +29,6 @@ class Player(CircleShape):
             self.rotate(-dt)
         if keys[pygame.K_d]:
             self.rotate(dt)
-            
+        
+    def move(self, dt):
+        unit_vector = pygame.Vector2(0,1)
