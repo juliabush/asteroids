@@ -2,6 +2,7 @@ from constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from logger import log_state
 from player import Player
 from asteroidfield import AsteroidField
+from asteroid import Asteroid
 import pygame
 
 def main():
@@ -24,11 +25,13 @@ def main():
 
     Player.containers = (updatable, drawable)
 
-    Asteroid.containers = (asteroids, updatable, drawable)
+    AsteroidField.containers = (asteroids, updatable, drawable)
 
     player_object = Player(x, y)
 
-    asteroidfield_object = Asteroid(updatable)
+    AsteroidField.containers = (updatable,)
+
+    asteroidfield_object = AsteroidField()
 
     while True:
         log_state()
