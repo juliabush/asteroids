@@ -29,5 +29,8 @@ def main():
     y = SRCREEN_HEIGHT / 2
     player_object = Player(x, y)
 
+    player.draw(screen)
+
+    
 if __name__ == "__main__":
     main()
