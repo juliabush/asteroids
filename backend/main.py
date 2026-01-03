@@ -1,66 +1,73 @@
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT
-from logger import log_state, log_event
-from player import Player
-from asteroidfield import AsteroidField
-from asteroid import Asteroid
-from shot import Shot
+import os
 import pygame
 import sys
+import asyncio
+import json
 
-def main():
-    print(f"Starting Asteroids with pygame version: {pygame.version.ver}, Screen width: {SCREEN_WIDTH} \n Screen height: {SCREEN_HEIGHT}")
+from backend.constants import SCREEN_WIDTH, SCREEN_HEIGHT
+from backend.logger import log_state, log_event
+from backend.player import Player
+from backend.asteroidfield import AsteroidField
+from backend.asteroid import Asteroid
+from backend.shot import Shot
 
-    pygame.init()
+os.environ["SDL_VIDEODRIVER"] = "dummy"
 
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.init()
+screen = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+clock = pygame.time.Clock()
 
-    clock = pygame.time.Clock()
+updatable = pygame.sprite.Group()
+drawable = pygame.sprite.Group()
+asteroids = pygame.sprite.Group()
+shots = pygame.sprite.Group()
 
+Player.containers = (updatable, drawable)
+Asteroid.containers = (asteroids, updatable, drawable)
+Shot.containers = (shots, updatable, drawable)
+AsteroidField.containers = (updatable,)
+
+player_object = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+asteroidfield_object = AsteroidField()
+
+def run_game_step(dt):
+    updatable.update(dt)
+
+    for asteroid in asteroids:
+        for shot in shots:
+            if asteroid.collides_with(shot):
+                log_event("asteroid_shot")
+                shot.kill()
+                asteroid.split()
+
+        if asteroid.collides_with(player_object):
+            log_event("player_hit")
+            print("Game Over!")
+            return False  
+
+    return True  
+
+
+async def game_loop(connected_clients):
     dt = 0
-
-    x = SCREEN_WIDTH / 2
-    y = SCREEN_HEIGHT / 2
-
-    updatable = pygame.sprite.Group()
-    drawable = pygame.sprite.Group()
-    asteroids = pygame.sprite.Group()
-    shots = pygame.sprite.Group()
-
-    Player.containers = (updatable, drawable)
-
-    Asteroid.containers = (asteroids, updatable, drawable)
-
-    Shot.containers = (shots, updatable, drawable)
-
-    player_object = Player(x, y)
-
-    AsteroidField.containers = (updatable,)
-
-    asteroidfield_object = AsteroidField()
-
     while True:
-        log_state()
+        clock.tick(60)
+        cont = run_game_step(dt)
+        if not cont:
+            break
 
+        state = {
+            "player": [player_object.position.x, player_object.position.y],
+            "asteroids": [
+                [a.position.x, a.position.y, a.radius] for a in asteroids
+            ],
+            "shots": [
+                [s.position.x, s.position.y] for s in shots
+            ],
+        }
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                return
-        screen.fill("black")
-        updatable.update(dt)
-        for obj in drawable:
-            obj.draw(screen)
-        for asteroid in asteroids:
-            for shot in shots:
-                if asteroid.collides_with(shot):
-                    log_event("asteroid_shot")
-                    shot.kill()
-                    asteroid.split()
-            if asteroid.collides_with(player_object):
-                log_event("player_hit")
-                print("Game Over!")
-                sys.exit()
-        pygame.display.flip()
-        dt = clock.tick(60) / 1000
+        if connected_clients:
+            msg = json.dumps({"type": "state", "data": state})
+            await asyncio.gather(*(c.send(msg) for c in connected_clients))
 
-if __name__ == "__main__":
-    main()
+        await asyncio.sleep(1 / 60)  
