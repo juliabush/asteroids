@@ -11,9 +11,6 @@ Keys for navigation:
 ~ SPACE - Shoot
 ~ Avoid the steroids - one collision means GAME OVER!
 
-<!-- source .venv/bin/activate
-uv run -m main
-
-to get out type deactivate -->
-
+<!-- source .venv/bin/activate -->
+<!-- python -m backend.server -->
 <!-- JS frontend and websocket with python hosted backend -->
