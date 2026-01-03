@@ -3,6 +3,7 @@ import json
 import websockets
 from datetime import datetime
 
+from backend.main import game_loop  
 connected_clients = set()
 
 async def handler(websocket):
@@ -19,15 +20,6 @@ async def handler(websocket):
             data = json.loads(message)
             print(f"Received: {data}")
 
-            response = {
-                "type": "echo",
-                "received": data,
-                "timestamp": datetime.now().isoformat()
-            }
-            await asyncio.gather(
-                *(client.send(json.dumps(response)) for client in connected_clients)
-            )
-
     except websockets.ConnectionClosed:
         print("Client disconnected")
     finally:
@@ -37,7 +29,8 @@ async def handler(websocket):
 async def main():
     async with websockets.serve(handler, "0.0.0.0", 8000):
         print("WebSocket server running on ws://0.0.0.0:8000")
-        await asyncio.Future()  
+        asyncio.create_task(game_loop(connected_clients))
+        await asyncio.Future()
 
 if __name__ == "__main__":
     asyncio.run(main())
