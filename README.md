@@ -8,11 +8,15 @@ Navigate your ship, make sure to dodge asteroids, and fight back by shooting the
 
 ## How to play?
 
-Keys for navigation:
-~ W/S - Move forward/backward
-~ A/D - Rotate ship
-~ SPACE - Shoot
-~ Avoid the steroids - one collision means GAME OVER!
+**Keys for navigation:**
+
+- W/S -- Move forward/backward
+- A/D -- Rotate ship
+- SPACE -- Shoot
+
+**Objective:**
+
+- Avoid the asteroids -- one collision means GAME OVER!
 
 ### Architecture & Tech Stack
 
@@ -21,13 +25,13 @@ Frontend: Vanilla JavaScript, HTML5 Canvas, and CSS
 
 Infrastructure:
 
-** Backend **
+**Backend**
 
 - Hosted on AWS EC2
 - Dockerized services
 - Caddy as reverse proxy
 
-  ** Frontend **
+**Frontend**
 
 - Deployed on Vercel
 
