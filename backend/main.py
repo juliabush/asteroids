@@ -15,18 +15,10 @@ os.environ["SDL_VIDEODRIVER"] = "dummy"
 pygame.init()
 screen = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
 
-# ─────────────────────────────
-# Game phase
-# ─────────────────────────────
-
 PHASE_RUNNING = "running"
 PHASE_GAME_OVER = "game_over"
 
 game_phase = PHASE_RUNNING
-
-# ─────────────────────────────
-# Sprite groups
-# ─────────────────────────────
 
 updatable = pygame.sprite.Group()
 drawable = pygame.sprite.Group()
@@ -43,10 +35,6 @@ bind_containers()
 
 player_object = None
 asteroidfield_object = None
-
-# ─────────────────────────────
-# Game lifecycle
-# ─────────────────────────────
 
 def reset_game(player_inputs=None):
     global player_object, asteroidfield_object, game_phase
@@ -68,10 +56,6 @@ def reset_game(player_inputs=None):
     game_phase = PHASE_RUNNING
 
 
-# ─────────────────────────────
-# Simulation
-# ─────────────────────────────
-
 def run_game_step(dt):
     updatable.update(dt)
 
@@ -87,10 +71,6 @@ def run_game_step(dt):
             return "player_hit"
 
     return "ok"
-
-# ─────────────────────────────
-# Main loop
-# ─────────────────────────────
 
 async def game_loop(connected_clients, player_inputs):
     global game_phase

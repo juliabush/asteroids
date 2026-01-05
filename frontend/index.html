@@ -3,34 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Asteroids Web</title>
+    <title>Asteroids</title>
     <link rel="stylesheet" href="style.css" />
   </head>
-  <body>
-    <h1>Asteroids (WebSocket Edition)</h1>
-    <canvas id="gameCanvas" width="1280" height="720"></canvas>
-    <p id="status">Connecting to server...</p>
-    <div
-      id="gameOverModal"
-      style="
-        display: none;
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        text-align: center;
-        padding-top: 200px;
-      "
-    >
-      <h1>Game Over!</h1>
-      <button id="restartBtn" style="font-size: 20px; padding: 10px 20px">
+  <body class="game">
+    <canvas id="gameCanvas" class="game__canvas"></canvas>
+    <p id="status" class="game__status">Connecting to server...</p>
+    <div class="modal modal--game-over" id="gameOverModal">
+      <h1 class="modal_title">Game Over!</h1>
+      <button id="restartBtn" class="modal__action modal__action--primary">
         Restart
       </button>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
   </body>
 </html>
