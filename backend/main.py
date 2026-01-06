@@ -86,10 +86,10 @@ async def game_loop(connected_clients, player_inputs):
             if player_inputs["right"]:
                 player_object.rotation += PLAYER_TURN_SPEED * dt
             if player_inputs["up"]:
-                forward = pygame.Vector2(0, 1).rotate(player_object.rotation)
+                forward = pygame.Vector2(0, -1).rotate(player_object.rotation)
                 player_object.position += forward * PLAYER_SPEED * dt
             if player_inputs["down"]:
-                backward = pygame.Vector2(0, -1).rotate(player_object.rotation)
+                backward = pygame.Vector2(0, 1).rotate(player_object.rotation)
                 player_object.position += backward * PLAYER_SPEED * dt
             if player_inputs["space"]:
                 player_object.shoot()
