@@ -46,11 +46,7 @@ function handleMessage(event) {
   if (msg.type === "state") {
     gameState = msg.data;
 
-    if (msg.phase === "game_over") {
-      modal.style.display = "block";
-    } else {
-      modal.style.display = "none";
-    }
+    modal.style.display = msg.phase === "game_over" ? "block" : "none";
   }
 }
 
@@ -75,9 +71,7 @@ window.addEventListener("keydown", (e) => {
 
 window.addEventListener("keyup", (e) => {
   e.preventDefault();
-
   if (modal.style.display === "block") return;
-
   send("input_release", { key: e.key });
 });
 
@@ -106,6 +100,23 @@ function applyCameraTransform() {
   ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
 }
 
+function drawShip(x, y, rotation) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate((rotation * Math.PI) / 180);
+
+  const size = 12;
+  ctx.strokeStyle = "white";
+  ctx.beginPath();
+  ctx.moveTo(0, -size);
+  ctx.lineTo(-size, size);
+  ctx.lineTo(size, size);
+  ctx.closePath();
+  ctx.stroke();
+
+  ctx.restore();
+}
+
 function render() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -113,22 +124,9 @@ function render() {
   if (gameState) {
     applyCameraTransform();
 
-    const [px, py, rotation] = gameState.player;
-
-    ctx.strokeStyle = "white";
-    ctx.save();
-    ctx.translate(px, py);
-    ctx.rotate((rotation * Math.PI) / 180);
-
-    const size = 12;
-    ctx.beginPath();
-    ctx.moveTo(0, -size);
-    ctx.lineTo(-size, size);
-    ctx.lineTo(size, size);
-    ctx.closePath();
-    ctx.stroke();
-
-    ctx.restore();
+    for (const [x, y, rot] of gameState.players) {
+      drawShip(x, y, rot);
+    }
 
     ctx.strokeStyle = "gray";
     for (const [x, y, r] of gameState.asteroids) {
