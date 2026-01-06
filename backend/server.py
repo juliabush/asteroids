@@ -1,18 +1,14 @@
 import asyncio
 import json
 import websockets
+
 from backend.main import game_loop, reset_game
+from backend.player import Player
 
 connected_clients = set()
 
-player_inputs = {
-    "up": False,
-    "down": False,
-    "left": False,
-    "right": False,
-    "space": False,
-    "restart": False
-}
+players = {}       
+player_inputs = {} 
 
 KEY_MAP = {
     "ArrowUp": "up", "w": "up",
@@ -30,12 +26,21 @@ async def handler(websocket):
 
     connected_clients.add(websocket)
 
+    players[websocket] = Player(640, 360)
+    player_inputs[websocket] = {
+        "up": False,
+        "down": False,
+        "left": False,
+        "right": False,
+        "space": False,
+    }
+
     if not game_task or game_task.done():
         if len(connected_clients) == 1:
-            reset_game(player_inputs)
+            reset_game()
             game_task = asyncio.create_task(
-                game_loop(connected_clients, player_inputs)
-        )
+                game_loop(connected_clients, players, player_inputs)
+            )
 
     try:
         await websocket.send(json.dumps({
@@ -50,15 +55,19 @@ async def handler(websocket):
             if msg_type in ("input", "input_release"):
                 key = data.get("key")
                 if key in KEY_MAP:
-                    player_inputs[KEY_MAP[key]] = (msg_type == "input")
+                    player_inputs[websocket][KEY_MAP[key]] = (
+                        msg_type == "input"
+                    )
 
             elif msg_type == "restart":
-                reset_game(player_inputs)
+                reset_game()
 
     except websockets.ConnectionClosed:
         pass
     finally:
         connected_clients.discard(websocket)
+        players.pop(websocket, None)
+        player_inputs.pop(websocket, None)
 
 
 async def main():
