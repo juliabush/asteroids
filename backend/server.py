@@ -30,11 +30,6 @@ async def handler(websocket):
 
     connected_clients.add(websocket)
 
-    # if not game_task or game_task.done():
-    #     if len(connected_clients) == 1:
-    #         game_task = asyncio.create_task(game_loop(connected_clients, player_inputs))
-
-
     if not game_task or game_task.done():
         if len(connected_clients) == 1:
             reset_game(player_inputs)

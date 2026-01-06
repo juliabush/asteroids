@@ -33,6 +33,10 @@ def bind_containers():
 
 bind_containers()
 
+def wrap_position(pos):
+    pos.x %= SCREEN_WIDTH
+    pos.y %= SCREEN_HEIGHT
+
 player_object = None
 asteroidfield_object = None
 
@@ -88,9 +92,11 @@ async def game_loop(connected_clients, player_inputs):
             if player_inputs["up"]:
                 forward = pygame.Vector2(0, -1).rotate(player_object.rotation)
                 player_object.position += forward * PLAYER_SPEED * dt
+                wrap_position(player_object.position)
             if player_inputs["down"]:
                 backward = pygame.Vector2(0, 1).rotate(player_object.rotation)
                 player_object.position += backward * PLAYER_SPEED * dt
+                wrap_position(player_object.position)
             if player_inputs["space"]:
                 player_object.shoot()
 

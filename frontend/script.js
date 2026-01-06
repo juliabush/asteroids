@@ -95,7 +95,7 @@ window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
 function applyCameraTransform() {
-  const scale = Math.min(
+  const scale = Math.max(
     canvas.width / WORLD_WIDTH,
     canvas.height / WORLD_HEIGHT
   );
