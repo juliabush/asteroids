@@ -37,7 +37,7 @@ async def handler(websocket):
 
     if not game_task or game_task.done():
         if len(connected_clients) == 1:
-            reset_game()
+            reset_game(players, player_inputs)
             game_task = asyncio.create_task(
                 game_loop(connected_clients, players, player_inputs)
             )
@@ -54,13 +54,15 @@ async def handler(websocket):
 
             if msg_type in ("input", "input_release"):
                 key = data.get("key")
+                print("INPUT EVENT:", msg_type, key)
+
                 if key in KEY_MAP:
                     player_inputs[websocket][KEY_MAP[key]] = (
                         msg_type == "input"
                     )
 
             elif msg_type == "restart":
-                reset_game()
+                reset_game(players, player_inputs)
 
     except websockets.ConnectionClosed:
         pass

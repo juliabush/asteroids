@@ -15,6 +15,7 @@ class Player(CircleShape):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
         self.shot_cooldown = 0
+        self.fire_held = False
 
     def triangle(self):
         forward = pygame.Vector2(0, -1).rotate(self.rotation)
@@ -30,6 +31,7 @@ class Player(CircleShape):
         pygame.draw.polygon(screen, "white", self.triangle(), LINE_WIDTH)
 
     def shoot(self):
+        print("SHOOT CALLED", self.shot_cooldown)
         if self.shot_cooldown > 0:
             return
 

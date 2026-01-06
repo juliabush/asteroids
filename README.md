@@ -82,4 +82,4 @@ The conditional check on `gameState` ensures that rendering only occurs after th
 Finally, `requestAnimationFrame(render)` schedules the function to run again before the next browser repaint, creating a continuous render loop synchronized with the display refresh rate.
 
 <!-- source .venv/bin/activate -->
-<!-- python -m backend.server -->
+<!-- python backend/server.py -->

@@ -41,7 +41,7 @@ def wrap_position(pos):
     pos.y %= SCREEN_HEIGHT
 
 
-def reset_game():
+def reset_game(players, player_inputs):
     global game_phase
 
     updatable.empty()
@@ -50,13 +50,29 @@ def reset_game():
     shots.empty()
 
     bind_containers()
-
     AsteroidField()
+
+    for key in player_inputs:
+        player_inputs[key] = {
+            "up": False,
+            "down": False,
+            "left": False,
+            "right": False,
+            "space": False,
+        }
+
+    for player in players.values():
+        player.shot_cooldown = 0
+        player.fire_held = False
+
     game_phase = PHASE_RUNNING
 
 
 def run_game_step(dt, players):
+    print("SHOTS BEFORE UPDATE:", len(shots))
     updatable.update(dt)
+    print("SHOTS AFTER UPDATE:", len(shots))
+
 
     for asteroid in list(asteroids):
         for player in players.values():
@@ -78,13 +94,14 @@ async def game_loop(connected_clients, players, player_inputs):
     dt = 1 / 60
 
     while True:
+        for player in players.values():
+            player.shot_cooldown = max(0, player.shot_cooldown - dt)
+
         if game_phase == PHASE_RUNNING:
             for ws, player in players.items():
                 inputs = player_inputs.get(ws)
                 if not inputs:
                     continue
-
-                player.shot_cooldown = max(0, player.shot_cooldown - dt)
 
                 if inputs["left"]:
                     player.rotation -= PLAYER_TURN_SPEED * dt
@@ -97,7 +114,13 @@ async def game_loop(connected_clients, players, player_inputs):
                     backward = pygame.Vector2(0, 1).rotate(player.rotation)
                     player.position += backward * PLAYER_SPEED * dt
                 if inputs["space"]:
-                    player.shoot()
+                    if not player.fire_held:
+                        print("SPACE TRUE", player.shot_cooldown, player.fire_held)
+                        player.shoot()
+                        player.fire_held = True
+                    else:
+                        player.fire_held = False
+
 
                 wrap_position(player.position)
 
