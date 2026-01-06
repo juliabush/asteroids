@@ -49,36 +49,18 @@ This snippet shows how the program is configured to run without a GUI so it rema
 The second line initializes the `screen` variable as an in-memory `pygame.Surface` with the given dimensions, which is not attached to any window or display.
 
 ```Python
-dt = 1 / 60
+players[websocket] = Player(640, 360)
+player_inputs[websocket] = {
+    "up": False,
+    "down": False,
+    "left": False,
+    "right": False,
+    "space": False,
+}
 
-while True:
-    if game_phase == PHASE_RUNNING:
-        ...
-        status = run_game_step(dt)
-
-    if connected_clients:
-        msg = json.dumps({
-            "type": "state",
-            "phase": game_phase,
-            "data": state
-        })
-        await asyncio.gather(
-            *(c.send(msg) for c in connected_clients),
-            return_exceptions=True
-        )
-
-    await asyncio.sleep(dt)
 ```
 
-This snippet starts by defining `dt` as delta time, representing the duration of one simulation step. At `1 / 60`, each step is approximately 16.7 ms, which makes movement and updates frame-rate independent.
-
-The `while True` creates an infinite loop that acts as the main game loop and runs for the lifetime of the server.
-
-The `if game_phase == PHASE_RUNNING` conditional ensures that the simulation only updates while the game is active. Assigning `status` to the result of `run_game_step(dt)` advances the simulation for one tick, updating positions, handling collisions, and applying game rules.
-
-The `if connected_clients` check ensures that state updates are only sent when at least one client is connected. The call to `json.dumps` serializes the current game state into JSON so it can be transmitted over the network. `await asyncio.gather` then sends the state update to all connected clients concurrently, allowing multiple asynchronous send operations to run at the same time.
-
-Finally, `await asyncio.sleep(dt)` pauses the loop for `dt` seconds, capping the loop at roughly 60 iterations per second while also allowing other asynchronous tasks, such as network I/O, to execute.
+This snippet shows a new `Player` instance being created for every WebSocket connection at coordinates `(640, 360)`, which corresponds to the center of the game world. The second line initializes a per-player input state, allowing each connected client to control their own ship independently without interfering with other players. This allows for multiplayer behavior with a shared game loop for a collaborative game play.
 
 ```JavaScript
 function render() {
