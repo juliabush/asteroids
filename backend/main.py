@@ -3,7 +3,7 @@ import pygame
 import asyncio
 import json
 
-from backend.constants import (
+from constants import (
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     PLAYER_SPEED,
