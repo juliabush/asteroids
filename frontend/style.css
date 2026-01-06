@@ -1,3 +1,26 @@
+:root {
+  --color-bg: #000;
+  --color-text: #fff;
+  --color-status: #0f0;
+
+  --color-accent-primary: #00ffcc;
+  --color-accent-primary-glow: #00ff37;
+  --color-accent-danger: #ff0033;
+
+  --font-main: monospace;
+
+  --modal-bg: rgba(0, 0, 0, 0.8);
+
+  --btn-font-size: 20px;
+  --btn-padding: 12px 28px;
+  --btn-border-width: 2px;
+
+  --title-font-size: 48px;
+  --title-letter-spacing: 4px;
+
+  --transition-fast: 0.15s ease;
+}
+
 html,
 body {
   margin: 0;
@@ -8,59 +31,59 @@ body {
 }
 
 .game {
-  background: #000;
+  background: var(--color-bg);
   text-align: center;
-  font-family: monospace;
+  font-family: var(--font-main);
 }
 
 .game__canvas {
-  background: black;
+  background: var(--color-bg);
   display: block;
 }
+
 .modal {
   position: fixed;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-
+  background: var(--modal-bg);
+  color: var(--color-text);
   place-self: center;
 }
 
 .modal__title {
-  font-size: 48px;
-  letter-spacing: 4px;
+  font-size: var(--title-font-size);
+  letter-spacing: var(--title-letter-spacing);
   text-transform: uppercase;
-  color: #ff0033;
+  color: var(--color-accent-danger);
 }
 
 .modal__action {
-  font-size: 20px;
-  padding: 12px 28px;
+  font-size: var(--btn-font-size);
+  padding: var(--btn-padding);
   cursor: pointer;
 
-  background: black;
-  color: #00ffcc;
-  border: 2px solid #00ffcc;
-  font-family: monospace;
+  background: var(--color-bg);
+  color: var(--color-accent-primary);
+  border: var(--btn-border-width) solid var(--color-accent-primary);
+  font-family: var(--font-main);
   letter-spacing: 2px;
   text-transform: uppercase;
 
-  box-shadow: 0 0 10px #00ffcc;
-  transition: all 0.15s ease;
+  box-shadow: 0 0 10px var(--color-accent-primary);
+  transition: all var(--transition-fast);
 }
 
 .modal__action:hover {
-  background: #00ffcc;
-  color: black;
-  box-shadow: 0 0 20px #00ff37;
+  background: var(--color-accent-primary);
+  color: var(--color-bg);
+  box-shadow: 0 0 20px var(--color-accent-primary-glow);
   transform: scale(1.05);
 }
 
 .modal__action:active {
   transform: scale(0.98);
-  box-shadow: 0 0 6px #00ff37;
+  box-shadow: 0 0 6px var(--color-accent-primary-glow);
 }
 
 .game__status {
   margin-top: 10px;
-  color: #0f0;
+  color: var(--color-status);
 }
