@@ -60,22 +60,22 @@ def run_game_step(dt):
     updatable.update(dt)
 
     for asteroid in list(asteroids):
+        if asteroid.collides_with(player_object):
+            return "player_hit"
+
+    for asteroid in list(asteroids):
         for shot in list(shots):
             if asteroid.collides_with(shot):
-                log_event("asteroid_shot")
                 shot.kill()
                 asteroid.split()
 
-        if asteroid.collides_with(player_object):
-            log_event("player_hit")
-            return "player_hit"
 
-    return "ok"
+    return "Everything worked as intended"
 
 async def game_loop(connected_clients, player_inputs):
     global game_phase
 
-    reset_game(player_inputs)
+    # reset_game(player_inputs)
 
     dt = 1 / 60
 
@@ -98,19 +98,24 @@ async def game_loop(connected_clients, player_inputs):
 
             if status == "player_hit":
                 game_phase = PHASE_GAME_OVER
-                if connected_clients:
-                    msg = json.dumps({"type": "game_over"})
-                    await asyncio.gather(
-                        *(c.send(msg) for c in connected_clients),
-                        return_exceptions=True
-                    )
+                # if connected_clients:
+                #     msg = json.dumps({"type": "game_over"})
+                #     await asyncio.gather(
+                #        *(c.send(msg) for c in connected_clients),
+                #           return_exceptions=True
+                #     )
 
         if connected_clients:
             state = {
-                "player": [player_object.position.x, player_object.position.y],
+                "player": [
+                    player_object.position.x,
+                    player_object.position.y,
+                    player_object.rotation
+                ],
                 "asteroids": [[a.position.x, a.position.y, a.radius] for a in asteroids],
                 "shots": [[s.position.x, s.position.y] for s in shots],
             }
+
 
             msg = json.dumps({
                 "type": "state",

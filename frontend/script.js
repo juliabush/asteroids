@@ -9,6 +9,9 @@ let gameState = null;
 
 canvas.focus();
 
+const WORLD_WIDTH = 1280;
+const WORLD_HEIGHT = 720;
+
 const WS = {
   socket: null,
   connected: false,
@@ -83,16 +86,49 @@ restartBtn.addEventListener("click", () => {
   send("restart");
 });
 
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
+function applyCameraTransform() {
+  const scale = Math.min(
+    canvas.width / WORLD_WIDTH,
+    canvas.height / WORLD_HEIGHT
+  );
+
+  const offsetX = (canvas.width - WORLD_WIDTH * scale) / 2;
+  const offsetY = (canvas.height - WORLD_HEIGHT * scale) / 2;
+
+  ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
+}
+
 function render() {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if (gameState) {
-    const [px, py] = gameState.player;
+    applyCameraTransform();
+
+    const [px, py, rotation] = gameState.player;
 
     ctx.strokeStyle = "white";
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate((rotation * Math.PI) / 180);
+
+    const size = 12;
     ctx.beginPath();
-    ctx.arc(px, py, 10, 0, Math.PI * 2);
+    ctx.moveTo(0, -size);
+    ctx.lineTo(-size, size);
+    ctx.lineTo(size, size);
+    ctx.closePath();
     ctx.stroke();
+
+    ctx.restore();
 
     ctx.strokeStyle = "gray";
     for (const [x, y, r] of gameState.asteroids) {

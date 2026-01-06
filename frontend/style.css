@@ -1,38 +1,63 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+}
+
 .game {
   background: #000;
-  color: #fff;
   text-align: center;
   font-family: monospace;
 }
 
 .game__canvas {
-  border: 2px solid white;
   background: black;
   display: block;
-  margin: 20px auto;
-  width: 1280px;
-  height: 720px;
 }
 .modal {
-  display: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  position: fixed;
   background: rgba(0, 0, 0, 0.8);
   color: white;
-  text-align: center;
-  padding-top: 200px;
+
+  place-self: center;
 }
 
 .modal__title {
-  margin-top: 20px;
+  font-size: 48px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #ff0033;
 }
 
 .modal__action {
   font-size: 20px;
-  padding: 10px 20px;
+  padding: 12px 28px;
+  cursor: pointer;
+
+  background: black;
+  color: #00ffcc;
+  border: 2px solid #00ffcc;
+  font-family: monospace;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+
+  box-shadow: 0 0 10px #00ffcc;
+  transition: all 0.15s ease;
+}
+
+.modal__action:hover {
+  background: #00ffcc;
+  color: black;
+  box-shadow: 0 0 20px #00ff37;
+  transform: scale(1.05);
+}
+
+.modal__action:active {
+  transform: scale(0.98);
+  box-shadow: 0 0 6px #00ff37;
 }
 
 .game__status {
