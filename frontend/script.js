@@ -21,8 +21,8 @@ let gameState = null;
 
 canvas.focus();
 
-const WORLD_WIDTH = 1280;
-const WORLD_HEIGHT = 720;
+let WORLD_WIDTH = 1280;
+let WORLD_HEIGHT = 720;
 
 const WS = {
   socket: null,
@@ -54,6 +54,11 @@ function connect() {
 
 function handleMessage(event) {
   const msg = JSON.parse(event.data);
+
+  if (msg.world) {
+    WORLD_WIDTH = msg.world[0];
+    WORLD_HEIGHT = msg.world[1];
+  }
 
   if (msg.type === "state") {
     gameState = msg.data;

@@ -145,8 +145,10 @@ async def game_loop(connected_clients, players, player_inputs):
             msg = json.dumps({
                 "type": "state",
                 "phase": game_phase,
+                "world": [SCREEN_WIDTH, SCREEN_HEIGHT],
                 "data": state
             })
+
 
             await asyncio.gather(
                 *(c.send(msg) for c in connected_clients),
