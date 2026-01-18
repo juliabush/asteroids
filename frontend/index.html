@@ -19,10 +19,12 @@
     <p id="status" class="game__status">Connecting to server...</p>
     <div class="modal modal--game-over" id="gameOverModal">
       <h1 class="modal__title">Game Over!</h1>
-      <button id="restartBtn" class="modal__action modal__action--primary">
-        Restart
-      </button>
-      <button id="instructionsBtn" class="modal__action">Instructions</button>
+      <div class="button_flex">
+        <button id="restartBtn" class="modal__action modal__action--primary">
+          Restart
+        </button>
+        <button id="instructionsBtn" class="modal__action">Instructions</button>
+      </div>
     </div>
 
     <div
@@ -33,11 +35,10 @@
       <h1 class="modal__title">How to Play</h1>
 
       <p class="modal__text">
-        Arrow Keys — Rotate and thrust<br />
-        Space — Shoot<br />
-        Avoid asteroids<br />
-        Destroy asteroids to survive<br />
-        Screen edges wrap around
+        Both Arrow Keys and W, A, S, D allow you to rotate and move forward<br />
+        Space key is used to shoot asteroids<br />
+        Avoid asteroids, the game ends if you hit one<br />
+        Destroy asteroids to survive by shooting them<br />
       </p>
 
       <button id="closeInstructionsBtn" class="modal__action">Close</button>
