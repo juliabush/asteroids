@@ -11,14 +11,16 @@
       <text y='.9em' font-size='100'>🪐</text>
      </svg>"
     />
-
     <link rel="stylesheet" href="style.css" />
   </head>
+
   <body class="game">
     <canvas id="gameCanvas" class="game__canvas"></canvas>
     <p id="status" class="game__status">Connecting to server...</p>
+
     <div class="modal modal--game-over" id="gameOverModal">
       <h1 class="modal__title">Game Over!</h1>
+
       <div class="button_flex">
         <button id="restartBtn" class="modal__action modal__action--primary">
           Restart
@@ -34,11 +36,43 @@
     >
       <h1 class="modal__title">How to Play</h1>
 
+      <div class="controls">
+        <h3>Movement (WASD or Arrow Keys)</h3>
+
+        <div class="controls__row">
+          <div class="key">W</div>
+          <div class="key">↑</div>
+          <span>Move up</span>
+        </div>
+
+        <div class="controls__row">
+          <div class="key">A</div>
+          <div class="key">←</div>
+          <span>Rotate Left</span>
+        </div>
+
+        <div class="controls__row">
+          <div class="key">D</div>
+          <div class="key">→</div>
+          <span>Rotate Right</span>
+        </div>
+        <div class="controls__row">
+          <div class="key">s</div>
+          <div class="key">⬇</div>
+          <span>Move down</span>
+        </div>
+
+        <h3>Combat</h3>
+
+        <div class="controls__row">
+          <div class="key wide">Space</div>
+          <span>Shoot</span>
+        </div>
+      </div>
+
       <p class="modal__text">
-        Both Arrow Keys and W, A, S, D allow you to rotate and move forward<br />
-        Space key is used to shoot asteroids<br />
-        Avoid asteroids, the game ends if you hit one<br />
-        Destroy asteroids to survive by shooting them<br />
+        Avoid asteroids — the game ends if you hit one.<br />
+        Destroy asteroids to survive.
       </p>
 
       <button id="closeInstructionsBtn" class="modal__action">Close</button>

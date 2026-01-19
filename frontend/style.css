@@ -119,3 +119,28 @@ body {
   gap: 1rem;
   flex-direction: column;
 }
+
+.controls {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 2rem;
+}
+
+.controls__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+}
+
+.key {
+  border: 2px solid var(--color-accent-primary);
+  padding: 6px 10px;
+  min-width: 32px;
+  text-align: center;
+  box-shadow: 0 0 8px var(--color-accent-primary);
+}
+
+.key.wide {
+  min-width: 80px;
+}
