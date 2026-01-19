@@ -2,13 +2,13 @@ import asyncio
 import json
 import websockets
 
-from main import game_loop, reset_game
+from main import game_loop, reset_game, client_worlds
 from player import Player
 
 connected_clients = set()
 
-players = {}       
-player_inputs = {} 
+players = {}
+player_inputs = {}
 
 KEY_MAP = {
     "ArrowUp": "up", "w": "up",
@@ -54,12 +54,17 @@ async def handler(websocket):
 
             if msg_type in ("input", "input_release"):
                 key = data.get("key")
-                print("INPUT EVENT:", msg_type, key)
 
                 if key in KEY_MAP:
                     player_inputs[websocket][KEY_MAP[key]] = (
                         msg_type == "input"
                     )
+
+            elif msg_type == "resize":
+                player_inputs[websocket]["_resize"] = {
+                    "width": data["width"],
+                    "height": data["height"],
+                }
 
             elif msg_type == "restart":
                 reset_game(players, player_inputs)
@@ -70,6 +75,7 @@ async def handler(websocket):
         connected_clients.discard(websocket)
         players.pop(websocket, None)
         player_inputs.pop(websocket, None)
+        client_worlds.pop(websocket, None)
 
 
 async def main():

@@ -21,14 +21,27 @@ let gameState = null;
 
 canvas.focus();
 
-let WORLD_WIDTH = 1280;
-let WORLD_HEIGHT = 720;
+let WORLD_WIDTH = window.innerWidth;
+let WORLD_HEIGHT = window.innerHeight;
 
 const WS = {
   socket: null,
   connected: false,
   reconnectTimer: null,
 };
+
+function send(type, payload = {}) {
+  if (!WS.socket || WS.socket.readyState !== WebSocket.OPEN) return;
+  WS.socket.send(JSON.stringify({ type, ...payload }));
+}
+
+function sendViewportSize() {
+  const dpr = window.devicePixelRatio || 1;
+  send("resize", {
+    width: canvas.width / dpr,
+    height: canvas.height / dpr,
+  });
+}
 
 function connect() {
   if (WS.socket && WS.socket.readyState === WebSocket.OPEN) return;
@@ -39,6 +52,7 @@ function connect() {
     WS.connected = true;
     statusEl.textContent = "Connected";
     clearTimeout(WS.reconnectTimer);
+    sendViewportSize();
   };
 
   WS.socket.onclose = () => {
@@ -64,11 +78,6 @@ function handleMessage(event) {
     gameState = msg.data;
     modal.style.display = msg.phase === "game_over" ? "block" : "none";
   }
-}
-
-function send(type, payload = {}) {
-  if (!WS.socket || WS.socket.readyState !== WebSocket.OPEN) return;
-  WS.socket.send(JSON.stringify({ type, ...payload }));
 }
 
 window.addEventListener("keydown", (e) => {
@@ -105,31 +114,14 @@ function resizeCanvas() {
   canvas.style.width = window.innerWidth + "px";
   canvas.style.height = window.innerHeight + "px";
 
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sendViewportSize();
 }
 
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
 function applyCameraTransform() {
-  const dpr = window.devicePixelRatio || 1;
-
-  const viewW = canvas.width / dpr;
-  const viewH = canvas.height / dpr;
-
-  const margin = 12;
-
-  const scale = Math.min(
-    viewW / (WORLD_WIDTH - margin * 2),
-    viewH / (WORLD_HEIGHT - margin * 2),
-  );
-
-  const offsetX =
-    (viewW - (WORLD_WIDTH - margin * 2) * scale) / 2 + margin * scale;
-  const offsetY =
-    (viewH - (WORLD_HEIGHT - margin * 2) * scale) / 2 + margin * scale;
-
-  ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
 function drawShip(x, y, rotation) {

@@ -36,9 +36,20 @@ def bind_containers():
 
 bind_containers()
 
-def wrap_position(pos):
-    pos.x %= SCREEN_WIDTH
-    pos.y %= SCREEN_HEIGHT
+SHIP_RADIUS = 12
+
+client_worlds = {}
+
+def wrap_position(pos, w, h):
+    if pos.x < -SHIP_RADIUS:
+        pos.x = w + SHIP_RADIUS
+    elif pos.x > w + SHIP_RADIUS:
+        pos.x = -SHIP_RADIUS
+
+    if pos.y < -SHIP_RADIUS:
+        pos.y = h + SHIP_RADIUS
+    elif pos.y > h + SHIP_RADIUS:
+        pos.y = -SHIP_RADIUS
 
 
 def reset_game(players, player_inputs):
@@ -91,6 +102,15 @@ async def game_loop(connected_clients, players, player_inputs):
     dt = 1 / 60
 
     while True:
+        for ws in list(player_inputs.keys()):
+            try:
+                msg = player_inputs[ws].get("_resize")
+                if msg:
+                    client_worlds[ws] = (msg["width"], msg["height"])
+                    del player_inputs[ws]["_resize"]
+            except Exception:
+                pass
+
         for player in players.values():
             player.shot_cooldown = max(0, player.shot_cooldown - dt)
 
@@ -112,21 +132,22 @@ async def game_loop(connected_clients, players, player_inputs):
                     player.position += backward * PLAYER_SPEED * dt
                 if inputs["space"]:
                     if not player.fire_held:
-                        print("SPACE TRUE", player.shot_cooldown, player.fire_held)
                         player.shoot()
                         player.fire_held = True
                     else:
                         player.fire_held = False
 
-
-                wrap_position(player.position)
+                w, h = client_worlds.get(ws, (SCREEN_WIDTH, SCREEN_HEIGHT))
+                wrap_position(player.position, w, h)
 
             status = run_game_step(dt, players)
 
             if status == "player_hit":
                 game_phase = PHASE_GAME_OVER
 
-        if connected_clients:
+        for ws in connected_clients:
+            w, h = client_worlds.get(ws, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
             state = {
                 "players": [
                     [p.position.x, p.position.y, p.rotation]
@@ -145,14 +166,10 @@ async def game_loop(connected_clients, players, player_inputs):
             msg = json.dumps({
                 "type": "state",
                 "phase": game_phase,
-                "world": [SCREEN_WIDTH, SCREEN_HEIGHT],
+                "world": [w, h],
                 "data": state
             })
 
-
-            await asyncio.gather(
-                *(c.send(msg) for c in connected_clients),
-                return_exceptions=True
-            )
+            await ws.send(msg)
 
         await asyncio.sleep(dt)
