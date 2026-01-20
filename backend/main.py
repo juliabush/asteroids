@@ -56,9 +56,7 @@ def create_world(ws, w, h):
         "phase": PHASE_RUNNING,
     }
 
-    p = Player()
-    p.position.x = w / 2
-    p.position.y = h / 2
+    p = Player(w / 2, h / 2)
     p.shot_cooldown = 0
     p.fire_held = False
 

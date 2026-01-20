@@ -2,7 +2,7 @@ import asyncio
 import json
 import websockets
 
-from main import game_loop, client_worlds
+from main import game_loop, client_worlds, create_world, reset_world
 from player import Player
 
 connected_clients = set()
@@ -26,7 +26,8 @@ async def handler(websocket):
 
     connected_clients.add(websocket)
 
-    players[websocket] = Player(640, 360)
+    client_worlds[websocket] = (640, 360)
+    players[websocket] = create_world(websocket, 640, 360)
     player_inputs[websocket] = {
         "up": False,
         "down": False,
@@ -36,11 +37,10 @@ async def handler(websocket):
     }
 
     if not game_task or game_task.done():
-        if len(connected_clients) == 1:
-            reset_game(players, player_inputs)
-            game_task = asyncio.create_task(
-                game_loop(connected_clients, players, player_inputs)
-            )
+        game_task = asyncio.create_task(
+            game_loop(connected_clients, players, player_inputs)
+        )
+
 
     try:
         await websocket.send(json.dumps({
@@ -67,7 +67,14 @@ async def handler(websocket):
                 }
 
             elif msg_type == "restart":
-                reset_game(players, player_inputs)
+                players[websocket] = reset_world(websocket)
+                player_inputs[websocket] = {
+                    "up": False,
+                    "down": False,
+                    "left": False,
+                    "right": False,
+                    "space": False,
+                }
 
     except websockets.ConnectionClosed:
         pass
