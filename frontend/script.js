@@ -121,7 +121,9 @@ window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
 function applyCameraTransform() {
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const scaleX = canvas.width / WORLD_WIDTH;
+  const scaleY = canvas.height / WORLD_HEIGHT;
+  ctx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
 }
 
 function drawShip(x, y, rotation) {
