@@ -46,7 +46,7 @@ function sendViewportSize() {
 function connect() {
   if (WS.socket && WS.socket.readyState === WebSocket.OPEN) return;
 
-  WS.socket = new WebSocket("wss://juliabush.pl/");
+  WS.socket = new WebSocket("wss://juliabush.pl/ws");
 
   WS.socket.onopen = () => {
     WS.connected = true;
