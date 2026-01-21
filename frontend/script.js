@@ -9,12 +9,19 @@ const instructionsBtn = document.getElementById("instructionsBtn");
 const instructionsModal = document.getElementById("instructionsModal");
 const closeInstructionsBtn = document.getElementById("closeInstructionsBtn");
 
+const helpBtn = document.getElementById("helpBtn");
+helpBtn.style.display = "block";
+
 instructionsBtn.addEventListener("click", () => {
   instructionsModal.style.display = "block";
 });
 
 closeInstructionsBtn.addEventListener("click", () => {
   instructionsModal.style.display = "none";
+});
+
+helpBtn.addEventListener("click", () => {
+  instructionsModal.style.display = "block";
 });
 
 let gameState = null;
@@ -76,7 +83,10 @@ function handleMessage(event) {
 
   if (msg.type === "state") {
     gameState = msg.data;
-    modal.style.display = msg.phase === "game_over" ? "block" : "none";
+
+    const isGameOver = msg.phase === "game_over";
+    modal.style.display = isGameOver ? "block" : "none";
+    helpBtn.style.display = isGameOver ? "none" : "block";
   }
 }
 
