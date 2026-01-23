@@ -22,6 +22,8 @@ PHASE_GAME_OVER = "game_over"
 
 SHIP_RADIUS = 12
 
+VERSION = "v1"
+
 client_worlds = {}
 worlds = {}
 
@@ -156,9 +158,11 @@ async def game_loop(connected_clients, players, player_inputs):
 
             await ws.send(json.dumps({
                 "type": "state",
+                "version": VERSION,
                 "phase": world["phase"],
                 "world": [w, h],
                 "data": state,
             }))
+
 
         await asyncio.sleep(dt)
