@@ -3,7 +3,6 @@ const ctx = canvas.getContext("2d");
 
 const statusEl = document.getElementById("status");
 const modal = document.getElementById("gameOverModal");
-const restartBtn = document.getElementById("restartBtn");
 
 const instructionsBtn = document.getElementById("instructionsBtn");
 const instructionsModal = document.getElementById("instructionsModal");
@@ -30,14 +29,6 @@ function send(type, payload = {}) {
   WS.socket.send(JSON.stringify({ type, ...payload }));
 }
 
-function sendViewportSize() {
-  const dpr = window.devicePixelRatio || 1;
-  send("resize", {
-    width: canvas.width / dpr,
-    height: canvas.height / dpr,
-  });
-}
-
 function connect() {
   if (WS.socket && WS.socket.readyState === WebSocket.OPEN) return;
 
@@ -47,7 +38,6 @@ function connect() {
     WS.connected = true;
     statusEl.textContent = "Connected";
     clearTimeout(WS.reconnectTimer);
-    sendViewportSize();
   };
 
   WS.socket.onclose = () => {
@@ -80,23 +70,14 @@ function handleMessage(event) {
 
 window.addEventListener("keydown", (e) => {
   e.preventDefault();
-
-  if (modal.style.display === "block") {
-    if (e.key === "Enter") {
-      modal.style.display = "none";
-      send("restart");
-    }
-    return;
-  }
-
   send("input", { key: e.key });
 });
 
 window.addEventListener("keyup", (e) => {
   e.preventDefault();
-  if (modal.style.display === "block") return;
   send("input_release", { key: e.key });
 });
+
 function openInstructions() {
   instructionsModal.style.display = "block";
   document.body.classList.add("modal-open");
@@ -111,11 +92,6 @@ instructionsBtn.addEventListener("click", openInstructions);
 helpBtn.addEventListener("click", openInstructions);
 closeInstructionsBtn.addEventListener("click", closeInstructions);
 
-restartBtn.addEventListener("click", () => {
-  modal.style.display = "none";
-  send("restart");
-});
-
 function resizeCanvas() {
   const dpr = window.devicePixelRatio || 1;
 
@@ -124,8 +100,6 @@ function resizeCanvas() {
 
   canvas.style.width = window.innerWidth + "px";
   canvas.style.height = window.innerHeight + "px";
-
-  sendViewportSize();
 }
 
 window.addEventListener("resize", resizeCanvas);
