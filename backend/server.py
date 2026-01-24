@@ -2,12 +2,10 @@ import asyncio
 import json
 import websockets
 
-from main import game_loop, client_worlds, create_world, reset_world
+from main import game_loop, create_world, world
 from player import Player
 
 connected_clients = set()
-
-players = {}
 player_inputs = {}
 
 KEY_MAP = {
@@ -26,8 +24,11 @@ async def handler(websocket):
 
     connected_clients.add(websocket)
 
-    client_worlds[websocket] = (640, 360)
-    players[websocket] = create_world(websocket, 640, 360)
+    p = Player(world["size"][0] / 2, world["size"][1] / 2)
+    p.shot_cooldown = 0
+    p.fire_held = False
+    world["players"][websocket] = p
+
     player_inputs[websocket] = {
         "up": False,
         "down": False,
@@ -38,54 +39,31 @@ async def handler(websocket):
 
     if not game_task or game_task.done():
         game_task = asyncio.create_task(
-            game_loop(connected_clients, players, player_inputs)
+            game_loop(connected_clients, player_inputs)
         )
 
-
     try:
-        await websocket.send(json.dumps({
-            "type": "connection",
-            "message": "Connected to Asteroids WebSocket server"
-        }))
-
         async for message in websocket:
             data = json.loads(message)
             msg_type = data.get("type")
 
             if msg_type in ("input", "input_release"):
                 key = data.get("key")
-
                 if key in KEY_MAP:
                     player_inputs[websocket][KEY_MAP[key]] = (
                         msg_type == "input"
                     )
 
-            elif msg_type == "resize":
-                player_inputs[websocket]["_resize"] = {
-                    "width": data["width"],
-                    "height": data["height"],
-                }
-
-            elif msg_type == "restart":
-                players[websocket] = reset_world(websocket)
-                player_inputs[websocket] = {
-                    "up": False,
-                    "down": False,
-                    "left": False,
-                    "right": False,
-                    "space": False,
-                }
-
     except websockets.ConnectionClosed:
         pass
     finally:
         connected_clients.discard(websocket)
-        players.pop(websocket, None)
+        world["players"].pop(websocket, None)
         player_inputs.pop(websocket, None)
-        client_worlds.pop(websocket, None)
 
 
 async def main():
+    create_world(640, 360)
     async with websockets.serve(handler, "0.0.0.0", 8000):
         await asyncio.Future()
 

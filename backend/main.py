@@ -21,11 +21,10 @@ PHASE_RUNNING = "running"
 PHASE_GAME_OVER = "game_over"
 
 SHIP_RADIUS = 12
-
 VERSION = "v2"
 
-client_worlds = {}
-worlds = {}
+world = None
+
 
 def wrap_position(pos, w, h):
     if pos.x < -SHIP_RADIUS:
@@ -39,7 +38,9 @@ def wrap_position(pos, w, h):
         pos.y = -SHIP_RADIUS
 
 
-def create_world(ws, w, h):
+def create_world(w, h):
+    global world
+
     updatable = pygame.sprite.Group()
     asteroids = pygame.sprite.Group()
     shots = pygame.sprite.Group()
@@ -51,43 +52,32 @@ def create_world(ws, w, h):
 
     AsteroidField()
 
-    worlds[ws] = {
+    world = {
         "updatable": updatable,
         "asteroids": asteroids,
         "shots": shots,
+        "players": {},
         "phase": PHASE_RUNNING,
+        "size": (w, h),
     }
 
-    p = Player(w / 2, h / 2)
-    p.shot_cooldown = 0
-    p.fire_held = False
 
-    return p
-
-
-def reset_world(ws):
-    w, h = client_worlds[ws]
-    worlds.pop(ws, None)
-    return create_world(ws, w, h)
-
-
-def run_game_step(dt, ws, player):
-    world = worlds[ws]
+def run_game_step(dt):
     updatable = world["updatable"]
     asteroids = world["asteroids"]
     shots = world["shots"]
+    w, h = world["size"]
 
     updatable.update(dt)
-
-    w, h = client_worlds[ws]
 
     for asteroid in asteroids:
         wrap_position(asteroid.position, w, h)
 
-    for asteroid in list(asteroids):
-        if asteroid.collides_with(player):
-            world["phase"] = PHASE_GAME_OVER
-            return
+    for player in world["players"].values():
+        wrap_position(player.position, w, h)
+        for asteroid in asteroids:
+            if asteroid.collides_with(player):
+                world["phase"] = PHASE_GAME_OVER
 
     for asteroid in list(asteroids):
         for shot in list(shots):
@@ -96,73 +86,59 @@ def run_game_step(dt, ws, player):
                 asteroid.split()
 
 
-async def game_loop(connected_clients, players, player_inputs):
+async def game_loop(connected_clients, player_inputs):
     dt = 1 / 60
 
     while True:
-        for ws in list(player_inputs.keys()):
-            resize = player_inputs[ws].pop("_resize", None)
-            if resize:
-                client_worlds[ws] = (resize["width"], resize["height"])
-                players[ws] = reset_world(ws)
+        if world["phase"] == PHASE_RUNNING:
+            for ws, player in world["players"].items():
+                inputs = player_inputs.get(ws)
+                if not inputs:
+                    continue
 
-        for ws, player in players.items():
-            world = worlds[ws]
-            if world["phase"] != PHASE_RUNNING:
-                continue
+                player.shot_cooldown = max(0, player.shot_cooldown - dt)
 
-            inputs = player_inputs[ws]
+                if inputs["left"]:
+                    player.rotation -= PLAYER_TURN_SPEED * dt
+                if inputs["right"]:
+                    player.rotation += PLAYER_TURN_SPEED * dt
+                if inputs["up"]:
+                    forward = pygame.Vector2(0, -1).rotate(player.rotation)
+                    player.position += forward * PLAYER_SPEED * dt
+                if inputs["down"]:
+                    backward = pygame.Vector2(0, 1).rotate(player.rotation)
+                    player.position += backward * PLAYER_SPEED * dt
+                if inputs["space"]:
+                    if not player.fire_held:
+                        player.shoot()
+                        player.fire_held = True
+                else:
+                    player.fire_held = False
 
-            player.shot_cooldown = max(0, player.shot_cooldown - dt)
+            run_game_step(dt)
 
-            if inputs["left"]:
-                player.rotation -= PLAYER_TURN_SPEED * dt
-            if inputs["right"]:
-                player.rotation += PLAYER_TURN_SPEED * dt
-            if inputs["up"]:
-                forward = pygame.Vector2(0, -1).rotate(player.rotation)
-                player.position += forward * PLAYER_SPEED * dt
-            if inputs["down"]:
-                backward = pygame.Vector2(0, 1).rotate(player.rotation)
-                player.position += backward * PLAYER_SPEED * dt
-            if inputs["space"]:
-                if not player.fire_held:
-                    player.shoot()
-                    player.fire_held = True
-            else:
-                player.fire_held = False
-
-            wrap_position(player.position, *client_worlds[ws])
-
-            run_game_step(dt, ws, player)
+        state = {
+            "players": [
+                [p.position.x, p.position.y, p.rotation]
+                for p in world["players"].values()
+            ],
+            "asteroids": [
+                [a.position.x, a.position.y, a.radius]
+                for a in world["asteroids"]
+            ],
+            "shots": [
+                [s.position.x, s.position.y]
+                for s in world["shots"]
+            ],
+        }
 
         for ws in connected_clients:
-            world = worlds[ws]
-            w, h = client_worlds[ws]
-
-            state = {
-                "players": [[
-                    players[ws].position.x,
-                    players[ws].position.y,
-                    players[ws].rotation,
-                ]],
-                "asteroids": [
-                    [a.position.x, a.position.y, a.radius]
-                    for a in world["asteroids"]
-                ],
-                "shots": [
-                    [s.position.x, s.position.y]
-                    for s in world["shots"]
-                ],
-            }
-
             await ws.send(json.dumps({
                 "type": "state",
                 "version": VERSION,
                 "phase": world["phase"],
-                "world": [w, h],
+                "world": list(world["size"]),
                 "data": state,
             }))
-
 
         await asyncio.sleep(dt)
