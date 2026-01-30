@@ -34,8 +34,8 @@ function send(type, payload = {}) {
 function connect() {
   if (WS.socket && WS.socket.readyState === WebSocket.OPEN) return;
 
-  // WS.socket = new WebSocket("wss://juliabush.pl/ws");
-  WS.socket = new WebSocket("ws://localhost:8000");
+  WS.socket = new WebSocket("wss://juliabush.pl/ws");
+  // WS.socket = new WebSocket("ws://localhost:8000");
 
   WS.socket.onopen = () => {
     WS.connected = true;
